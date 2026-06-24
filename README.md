@@ -1,41 +1,47 @@
-# Stockton Crime Tracker V3
+# Stockton Incident Map — News Aggregator V1
 
-A GitHub Pages friendly crime/calls-for-service dashboard for Stockton.
+This version does not use CAD at all.
 
-## Files
-- `index.html`
-- `style.css`
-- `app.js`
+It pulls public safety stories from:
+- Google News RSS searches
+- KCRA RSS
+- Stocktonia Public Safety RSS/page
+- Source-specific Google News searches for ABC10, FOX40, The Record, Stocktonia, KCRA
 
-## How to run locally on Mac
+Then it:
+- Filters for Stockton/San Joaquin public safety terms
+- Classifies incidents
+- Deduplicates similar stories
+- Extracts likely location text
+- Geocodes approximate marker locations
+- Displays them on a Leaflet map
 
-Open Terminal in this folder and run:
+## Run on Mac
+
+Install Node.js LTS from nodejs.org.
+
+Then open Terminal in this folder and run:
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm start
 ```
 
-Then open:
+Open:
 
 ```text
-http://localhost:8000
+http://localhost:3000
 ```
 
-## What changed in V3
-- Defaults to Last 24 Hours
-- Date presets:
-  - Last 24 Hours
-  - Today
-  - Yesterday
-  - Last 7 Days
-  - Last 30 Days
-  - This Month
-  - Custom Range
-- Dashboard counters
-- Marker clustering
-- Priority marker colors
-- Category filter
-- Call type filter
-- District filter
-- Search box
-- Auto-refresh option
+## Important limitations
+
+This is not a perfect "all news" machine yet.
+
+Some outlets block scraping or do not provide full RSS feeds. Google News RSS helps discover stories, but locations may be incomplete. The app maps stories to Stockton city center when it cannot extract a street or intersection.
+
+For production, the next step would be:
+- Database cache
+- Better geocoding
+- Article body extraction
+- Admin review screen
+- Optional paid search API like SerpAPI, Bing News Search, or GNews

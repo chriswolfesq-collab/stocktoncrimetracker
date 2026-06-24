@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stockton Incident Map - News Aggregator</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">209</div>
+      <div>
+        <h1>Stockton Incident Map</h1>
+        <div class="sub">News-only aggregator. No CAD calls.</div>
+      </div>
+    </div>
+
+    <section class="panel">
+      <label>Time Range</label>
+      <select id="rangeFilter">
+        <option value="ALL">All Stories</option>
+        <option value="TODAY">Today</option>
+        <option value="WEEK" selected>This Week</option>
+        <option value="MONTH">This Month</option>
+      </select>
+
+      <label>Category</label>
+      <select id="categoryFilter">
+        <option value="ALL">All Categories</option>
+        <option value="SHOOTING">Shootings</option>
+        <option value="HOMICIDE">Homicides</option>
+        <option value="ROBBERY">Robberies</option>
+        <option value="BURGLARY">Burglaries</option>
+        <option value="PURSUIT">Pursuits</option>
+        <option value="TRAFFIC">Major Traffic</option>
+        <option value="FIRE">Fire</option>
+        <option value="MISSING">Missing / Wanted</option>
+        <option value="OTHER">Other</option>
+      </select>
+
+      <label>Search</label>
+      <input id="searchBox" placeholder="Search title, street, source...">
+    </section>
+
+    <section class="panel">
+      <div class="stats">
+        <div class="stat green"><span id="totalStories">0</span><small>Stories</small></div>
+        <div class="stat red"><span id="violentStories">0</span><small>Violent</small></div>
+        <div class="stat orange"><span id="arrestStories">0</span><small>Arrests/Court</small></div>
+        <div class="stat blue"><span id="sourceCount">0</span><small>Sources</small></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <button id="refreshBtn">Refresh News</button>
+        <button id="fitBtn">Fit Map</button>
+      </div>
+      <div id="status" class="notice">Loading...</div>
+    </section>
+
+    <section class="panel notice">
+      Pulls from public RSS/search feeds, dedupes articles, classifies incidents, and geocodes likely locations. Some stories will map to city center until the location can be extracted.
+    </section>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <strong id="showingLabel">Showing: This Week</strong>
+        <span id="countLabel">0 stories visible</span>
+      </div>
+      <input id="quickSearch" placeholder="Quick search stories...">
+    </div>
+    <div id="map"></div>
+  </main>
+
+  <aside class="storyPanel">
+    <h2 id="storyTitle">Select an incident</h2>
+    <div id="storyMeta" class="storyMeta">Click a marker or a story from the feed.</div>
+    <div id="storyDetails"></div>
+    <h3>Story Feed</h3>
+    <div id="feed"></div>
+  </aside>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
