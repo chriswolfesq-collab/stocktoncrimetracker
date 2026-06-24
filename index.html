@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stockton Crime Tracker V2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#111;color:#fff}
+header{background:#b30000;padding:12px 16px;font-size:22px;font-weight:bold}
+#toolbar{display:flex;gap:10px;padding:10px;background:#222;flex-wrap:wrap}
+select,button{padding:8px}
+#map{height:calc(100vh - 110px)}
+.notice{padding:8px 12px;background:#333;font-size:14px}
+</style>
+</head>
+<body>
+<header>Stockton Crime Tracker V2</header>
+<div id="toolbar">
+<select id="type">
+<option value="ALL">All Types</option>
+</select>
+<button onclick="loadData()">Reload</button>
+</div>
+<div class="notice">
+This version is ready for live Stockton Open Data. If opened locally (file://), many browsers block API requests.
+Run a local web server (e.g. <code>python -m http.server</code>) or host on GitHub Pages.
+</div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const map=L.map('map').setView([37.9577,-121.2908],12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+ attribution:'© OpenStreetMap contributors'
+}).addTo(map);
+
+let markers=[];
+
+async function loadData(){
+  markers.forEach(m=>map.removeLayer(m));
+  markers=[];
+  document.getElementById("type").innerHTML='<option value="ALL">All Types</option>';
+
+  // Public Stockton Open Data endpoint (replace if dataset changes)
+  const url="https://data.stocktonca.gov/resource/esc4-8x43.json?$limit=500";
+
+  try{
+    const res=await fetch(url);
+    const data=await res.json();
+
+    const types=new Set();
+
+    data.forEach(r=>{
+      const lat=parseFloat(r.latitude||r.lat);
+      const lon=parseFloat(r.longitude||r.lon);
+
+      if(isNaN(lat)||isNaN(lon)) return;
+
+      const type=r.call_type||r.type||"Unknown";
+      types.add(type);
+
+      const marker=L.circleMarker([lat,lon],{
+        radius:6,
+        color:"#ff4444"
+      }).addTo(map);
+
+      marker.crimeType=type;
+
+      marker.bindPopup(`
+        <b>${type}</b><br>
+        <b>Date:</b> ${r.received_datetime||r.datetime||"Unknown"}<br>
+        <b>Location:</b> ${r.address||r.block||"Unavailable"}<br>
+        <hr>
+        <i>Related news integration coming in V3.</i>
+      `);
+
+      markers.push(marker);
+    });
+
+    [...types].sort().forEach(t=>{
+      const o=document.createElement("option");
+      o.value=t;
+      o.textContent=t;
+      document.getElementById("type").appendChild(o);
+    });
+
+  }catch(e){
+    alert("Unable to reach the live dataset. This is expected if opening the file directly or if the dataset schema changes. V2 is wired for live data and can be updated once hosted.");
+    console.error(e);
+  }
+}
+
+document.getElementById("type").addEventListener("change",e=>{
+ const v=e.target.value;
+ markers.forEach(m=>{
+   if(v==="ALL"||m.crimeType===v){m.addTo(map);}
+   else{map.removeLayer(m);}
+ });
+});
+
+loadData();
+</script>
+</body>
+</html>
