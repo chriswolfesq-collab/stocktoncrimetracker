@@ -1,106 +1,109 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Stockton Crime Tracker V2</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-<style>
-body{margin:0;font-family:Arial,sans-serif;background:#111;color:#fff}
-header{background:#b30000;padding:12px 16px;font-size:22px;font-weight:bold}
-#toolbar{display:flex;gap:10px;padding:10px;background:#222;flex-wrap:wrap}
-select,button{padding:8px}
-#map{height:calc(100vh - 110px)}
-.notice{padding:8px 12px;background:#333;font-size:14px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stockton Crime Tracker V3</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-<header>Stockton Crime Tracker V2</header>
-<div id="toolbar">
-<select id="type">
-<option value="ALL">All Types</option>
-</select>
-<button onclick="loadData()">Reload</button>
-</div>
-<div class="notice">
-This version is ready for live Stockton Open Data. If opened locally (file://), many browsers block API requests.
-Run a local web server (e.g. <code>python -m http.server</code>) or host on GitHub Pages.
-</div>
-<div id="map"></div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">SCT</div>
+      <div>
+        <h1>Stockton Crime Tracker</h1>
+        <p>Calls for Service Dashboard</p>
+      </div>
+    </div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-const map=L.map('map').setView([37.9577,-121.2908],12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
- attribution:'© OpenStreetMap contributors'
-}).addTo(map);
+    <section class="panel">
+      <label>Date Range</label>
+      <select id="datePreset">
+        <option value="24h" selected>Last 24 Hours</option>
+        <option value="today">Today</option>
+        <option value="yesterday">Yesterday</option>
+        <option value="7d">Last 7 Days</option>
+        <option value="30d">Last 30 Days</option>
+        <option value="month">This Month</option>
+        <option value="custom">Custom Range</option>
+      </select>
 
-let markers=[];
+      <div id="customDates" class="custom-dates hidden">
+        <label>From</label>
+        <input id="fromDate" type="date" />
+        <label>To</label>
+        <input id="toDate" type="date" />
+        <button id="applyCustom">Apply</button>
+      </div>
+    </section>
 
-async function loadData(){
-  markers.forEach(m=>map.removeLayer(m));
-  markers=[];
-  document.getElementById("type").innerHTML='<option value="ALL">All Types</option>';
+    <section class="panel">
+      <label>Incident Category</label>
+      <select id="categoryFilter">
+        <option value="ALL">All Categories</option>
+        <option value="VIOLENT">Violent / Weapons</option>
+        <option value="PROPERTY">Property Crime</option>
+        <option value="TRAFFIC">Traffic</option>
+        <option value="MEDICAL">Medical / Welfare</option>
+        <option value="SUSPICIOUS">Suspicious Activity</option>
+        <option value="OTHER">Other</option>
+      </select>
 
-  // Public Stockton Open Data endpoint (replace if dataset changes)
-  const url="https://data.stocktonca.gov/resource/esc4-8x43.json?$limit=500";
+      <label>Call Type</label>
+      <select id="typeFilter">
+        <option value="ALL">All Call Types</option>
+      </select>
 
-  try{
-    const res=await fetch(url);
-    const data=await res.json();
+      <label>District</label>
+      <select id="districtFilter">
+        <option value="ALL">All Districts</option>
+      </select>
+    </section>
 
-    const types=new Set();
+    <section class="panel">
+      <div class="stats-grid">
+        <div class="stat"><span id="totalCalls">0</span><small>Calls</small></div>
+        <div class="stat red"><span id="p1Calls">0</span><small>Priority 1</small></div>
+        <div class="stat orange"><span id="p2Calls">0</span><small>Priority 2</small></div>
+        <div class="stat blue"><span id="p3Calls">0</span><small>Priority 3+</small></div>
+      </div>
+    </section>
 
-    data.forEach(r=>{
-      const lat=parseFloat(r.latitude||r.lat);
-      const lon=parseFloat(r.longitude||r.lon);
+    <section class="panel">
+      <div class="row">
+        <button id="reloadBtn">Reload</button>
+        <button id="fitBtn">Fit Map</button>
+      </div>
+      <label class="check">
+        <input id="autoRefresh" type="checkbox" />
+        Auto-refresh every 60 seconds
+      </label>
+      <div id="status">Ready</div>
+    </section>
 
-      if(isNaN(lat)||isNaN(lon)) return;
+    <section class="panel note">
+      Uses Stockton's public Calls for Service feed. Locations are cross-street/generalized public data.
+    </section>
+  </aside>
 
-      const type=r.call_type||r.type||"Unknown";
-      types.add(type);
+  <main>
+    <div class="topbar">
+      <div>
+        <strong id="showingLabel">Showing: Last 24 Hours</strong>
+        <span id="countLabel">0 incidents</span>
+      </div>
+      <input id="searchBox" placeholder="Search call type, street, district..." />
+    </div>
+    <div id="map"></div>
+  </main>
 
-      const marker=L.circleMarker([lat,lon],{
-        radius:6,
-        color:"#ff4444"
-      }).addTo(map);
-
-      marker.crimeType=type;
-
-      marker.bindPopup(`
-        <b>${type}</b><br>
-        <b>Date:</b> ${r.received_datetime||r.datetime||"Unknown"}<br>
-        <b>Location:</b> ${r.address||r.block||"Unavailable"}<br>
-        <hr>
-        <i>Related news integration coming in V3.</i>
-      `);
-
-      markers.push(marker);
-    });
-
-    [...types].sort().forEach(t=>{
-      const o=document.createElement("option");
-      o.value=t;
-      o.textContent=t;
-      document.getElementById("type").appendChild(o);
-    });
-
-  }catch(e){
-    alert("Unable to reach the live dataset. This is expected if opening the file directly or if the dataset schema changes. V2 is wired for live data and can be updated once hosted.");
-    console.error(e);
-  }
-}
-
-document.getElementById("type").addEventListener("change",e=>{
- const v=e.target.value;
- markers.forEach(m=>{
-   if(v==="ALL"||m.crimeType===v){m.addTo(map);}
-   else{map.removeLayer(m);}
- });
-});
-
-loadData();
-</script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

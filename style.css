@@ -1,0 +1,44 @@
+*{box-sizing:border-box}
+body{margin:0;background:#0b0f14;color:#e8eef5;font-family:Arial,Helvetica,sans-serif;display:flex;height:100vh;overflow:hidden}
+.sidebar{width:340px;background:#121923;border-right:1px solid #273244;padding:16px;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.brand-mark{width:48px;height:48px;border-radius:12px;background:#b30000;display:flex;align-items:center;justify-content:center;font-weight:800}
+h1{font-size:20px;margin:0}
+p{margin:3px 0 0;color:#9aa9b9}
+.panel{background:#182230;border:1px solid #2b384c;border-radius:14px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#9aa9b9;margin:10px 0 6px}
+select,input,button{width:100%;padding:10px;border-radius:10px;border:1px solid #33445c;background:#0e141c;color:#e8eef5}
+button{cursor:pointer;background:#24364c;font-weight:700}
+button:hover{background:#314964}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hidden{display:none}
+.custom-dates{margin-top:8px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:#0e141c;border-radius:12px;padding:12px;border:1px solid #28374c}
+.stat span{display:block;font-size:28px;font-weight:800}
+.stat small{color:#9aa9b9}
+.red span{color:#ff4a4a}
+.orange span{color:#ffb347}
+.blue span{color:#5ca8ff}
+.check{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;color:#ccd6e3}
+.check input{width:auto}
+#status{font-size:13px;color:#9aa9b9;margin-top:12px;line-height:1.35}
+.note{font-size:12px;color:#9aa9b9;line-height:1.4}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:62px;background:#0e141c;border-bottom:1px solid #273244;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;gap:12px}
+#showingLabel{display:block}
+#countLabel{color:#9aa9b9;font-size:13px}
+#searchBox{max-width:360px}
+#map{flex:1}
+.priority-marker{border-radius:50%;border:2px solid white;box-shadow:0 0 12px rgba(0,0,0,.7)}
+.popup h3{margin:0 0 8px;color:#111}
+.popup-row{margin:3px 0}
+.popup-row b{display:inline-block;width:82px;color:#333}
+.leaflet-popup-content-wrapper{border-radius:12px}
+@media(max-width:800px){
+  body{display:block;overflow:auto}
+  .sidebar{width:100%;height:auto}
+  main{height:70vh}
+  .topbar{height:auto;display:block}
+  #searchBox{max-width:none;margin-top:8px}
+}
