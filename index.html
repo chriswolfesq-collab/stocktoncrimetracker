@@ -1,109 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stockton Crime Tracker V3</title>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8">
+<title>209 Incident Map - Google News</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#071018;color:#eef5ff;height:100vh;overflow:hidden}.app{display:grid;grid-template-columns:360px 1fr 370px;height:100vh}.sidebar,.storyPanel{background:#101a25;overflow:auto}.sidebar{border-right:1px solid #263545;padding:16px}.storyPanel{border-left:1px solid #263545;padding:16px}.brand{display:flex;align-items:center;gap:12px;margin-bottom:14px}.logo{width:52px;height:52px;border-radius:16px;background:#b30000;display:flex;align-items:center;justify-content:center;font-weight:900}h1{font-size:21px;margin:0}.sub,.notice{font-size:12px;color:#9fb0c3;margin-top:4px;line-height:1.4}.panel{background:#162231;border:1px solid #293a4d;border-radius:16px;padding:14px;margin-bottom:12px}label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#9fb0c3;margin:10px 0 6px}select,input,button{width:100%;border:1px solid #34485e;background:#0c141d;color:#eef5ff;border-radius:10px;padding:10px;font-size:14px}button{background:#263b52;font-weight:700;cursor:pointer}.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#0c141d;border:1px solid #27384c;border-radius:12px;padding:12px}.stat span{display:block;font-size:28px;font-weight:900}.stat small{color:#9fb0c3}.red span{color:#ff4444}.orange span{color:#ffb347}.blue span{color:#62a9ff}.green span{color:#75e092}main{position:relative;min-width:0}.topbar{height:64px;background:#0c141d;border-bottom:1px solid #263545;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;gap:12px}.topbar strong{display:block}.topbar span{display:block;color:#9fb0c3;font-size:13px}#map{height:calc(100vh - 64px)}.feedItem{background:#162231;border:1px solid #293a4d;border-radius:14px;padding:12px;margin-bottom:10px;cursor:pointer}.feedItem:hover,.feedItem.active{border-color:#ffb347}.feedItem .meta{font-size:12px;color:#9fb0c3}.feedItem .title{font-weight:900;margin:5px 0;line-height:1.25}.feedItem .desc{font-size:13px;color:#c7d4e2;line-height:1.35}.badge{display:inline-block;background:#263b52;color:#eef5ff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800;margin:3px 4px 3px 0}.storyPanel h2{margin:0 0 6px;line-height:1.2}.storyMeta{color:#9fb0c3;font-size:13px;line-height:1.4}.card{background:#162231;border:1px solid #293a4d;border-radius:14px;padding:12px;margin:12px 0}.card h3{margin:0 0 8px}.sourceLink{display:block;background:#0c141d;border:1px solid #34485e;border-radius:10px;color:#eef5ff;text-decoration:none;padding:10px;margin:8px 0;overflow-wrap:anywhere}.sourceLink small{display:block;color:#9fb0c3;margin-top:3px}.timeline{border-left:2px solid #3e5878;margin-left:8px;padding-left:14px}.timeline div{margin:12px 0;position:relative}.timeline div:before{content:"";position:absolute;left:-21px;top:3px;width:10px;height:10px;border-radius:50%;background:#ff4a4a}.timeline b{display:block}.timeline small{color:#9fb0c3}.popup h3{margin:0 0 8px;color:#111}.popup p{color:#333;line-height:1.35}.popup button{color:#fff;margin-top:8px}.category-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px}.loading{opacity:.65}@media(max-width:1120px){.app{grid-template-columns:340px 1fr}.storyPanel{display:none}}@media(max-width:760px){body{overflow:auto}.app{display:block;height:auto}.sidebar{height:auto}.topbar{height:auto;display:block}.topbar input{margin-top:8px}#map{height:70vh}.storyPanel{display:block;border-left:0;height:auto}}
+</style>
 </head>
-
 <body>
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark">SCT</div>
-      <div>
-        <h1>Stockton Crime Tracker</h1>
-        <p>Calls for Service Dashboard</p>
-      </div>
-    </div>
-
-    <section class="panel">
-      <label>Date Range</label>
-      <select id="datePreset">
-        <option value="24h" selected>Last 24 Hours</option>
-        <option value="today">Today</option>
-        <option value="yesterday">Yesterday</option>
-        <option value="7d">Last 7 Days</option>
-        <option value="30d">Last 30 Days</option>
-        <option value="month">This Month</option>
-        <option value="custom">Custom Range</option>
-      </select>
-
-      <div id="customDates" class="custom-dates hidden">
-        <label>From</label>
-        <input id="fromDate" type="date" />
-        <label>To</label>
-        <input id="toDate" type="date" />
-        <button id="applyCustom">Apply</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <label>Incident Category</label>
-      <select id="categoryFilter">
-        <option value="ALL">All Categories</option>
-        <option value="VIOLENT">Violent / Weapons</option>
-        <option value="PROPERTY">Property Crime</option>
-        <option value="TRAFFIC">Traffic</option>
-        <option value="MEDICAL">Medical / Welfare</option>
-        <option value="SUSPICIOUS">Suspicious Activity</option>
-        <option value="OTHER">Other</option>
-      </select>
-
-      <label>Call Type</label>
-      <select id="typeFilter">
-        <option value="ALL">All Call Types</option>
-      </select>
-
-      <label>District</label>
-      <select id="districtFilter">
-        <option value="ALL">All Districts</option>
-      </select>
-    </section>
-
-    <section class="panel">
-      <div class="stats-grid">
-        <div class="stat"><span id="totalCalls">0</span><small>Calls</small></div>
-        <div class="stat red"><span id="p1Calls">0</span><small>Priority 1</small></div>
-        <div class="stat orange"><span id="p2Calls">0</span><small>Priority 2</small></div>
-        <div class="stat blue"><span id="p3Calls">0</span><small>Priority 3+</small></div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="row">
-        <button id="reloadBtn">Reload</button>
-        <button id="fitBtn">Fit Map</button>
-      </div>
-      <label class="check">
-        <input id="autoRefresh" type="checkbox" />
-        Auto-refresh every 60 seconds
-      </label>
-      <div id="status">Ready</div>
-    </section>
-
-    <section class="panel note">
-      Uses Stockton's public Calls for Service feed. Locations are cross-street/generalized public data.
-    </section>
-  </aside>
-
-  <main>
-    <div class="topbar">
-      <div>
-        <strong id="showingLabel">Showing: Last 24 Hours</strong>
-        <span id="countLabel">0 incidents</span>
-      </div>
-      <input id="searchBox" placeholder="Search call type, street, district..." />
-    </div>
-    <div id="map"></div>
-  </main>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-  <script src="app.js"></script>
+<div class="app">
+<aside class="sidebar">
+<div class="brand"><div class="logo">209</div><div><h1>209 Incident Map</h1><div class="sub">Google News RSS public safety map. No CAD calls.</div></div></div>
+<section class="panel">
+<label>Time Range</label><select id="rangeFilter"><option value="ALL">All Stories</option><option value="TODAY">Today</option><option value="WEEK" selected>This Week</option><option value="MONTH">This Month</option></select>
+<label>Category</label><select id="categoryFilter"><option value="ALL">All Categories</option><option value="SHOOTING">Shootings</option><option value="HOMICIDE">Homicides</option><option value="ROBBERY">Robberies</option><option value="BURGLARY">Burglaries</option><option value="PURSUIT">Pursuits</option><option value="TRAFFIC">Major Traffic</option><option value="FIRE">Fire</option><option value="MISSING">Missing / Wanted</option><option value="COURT">Court / Arrest Updates</option><option value="OTHER">Other</option></select>
+<label>Search</label><input id="searchBox" placeholder="Search title, location, source...">
+</section>
+<section class="panel"><div class="stats"><div class="stat green"><span id="totalStories">0</span><small>Stories</small></div><div class="stat red"><span id="violentStories">0</span><small>Violent</small></div><div class="stat orange"><span id="arrestStories">0</span><small>Arrests/Court</small></div><div class="stat blue"><span id="sourceCount">0</span><small>Sources</small></div></div></section>
+<section class="panel"><div class="row"><button id="refreshBtn">Refresh News</button><button id="fitBtn">Fit Map</button></div><div id="status" class="notice">Ready</div></section>
+<section class="panel notice">Static GitHub Pages compatible prototype. It uses Google News RSS through a public CORS proxy, then classifies and maps stories in the browser. If the proxy is busy, hit Refresh.</section>
+</aside>
+<main><div class="topbar"><div><strong id="showingLabel">Showing: This Week</strong><span id="countLabel">0 stories visible</span></div><input id="quickSearch" placeholder="Quick search stories..."></div><div id="map"></div></main>
+<aside class="storyPanel"><h2 id="storyTitle">Select an incident</h2><div id="storyMeta" class="storyMeta">Click a marker or a story from the feed.</div><div id="storyDetails"></div><h3>Story Feed</h3><div id="feed"></div></aside>
+</div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const map=L.map("map").setView([37.9577,-121.2908],12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors"}).addTo(map);
+const STOCKTON={lat:37.9577,lng:-121.2908};
+const categoryColors={SHOOTING:"#ff3131",HOMICIDE:"#8b0000",ROBBERY:"#ff6b35",BURGLARY:"#ffb347",PURSUIT:"#b56cff",TRAFFIC:"#4dabf7",FIRE:"#ff7f11",MISSING:"#ffd166",COURT:"#75e092",OTHER:"#9fb0c3"};
+const queries=['Stockton California shooting homicide robbery arrest','Stockton California police public safety','Stockton California pursuit crash fire','Stockton California stabbing assault gun','site:stocktonia.org Stockton public safety','site:kcra.com Stockton shooting homicide arrest','site:abc10.com Stockton shooting homicide arrest','site:fox40.com Stockton shooting homicide arrest','site:recordnet.com Stockton crime police','site:stocktonca.gov police Stockton arrest shooting'];
+let stories=[],markers=[],selectedId=null; const $=id=>document.getElementById(id);
+function googleNewsRss(q){return "https://news.google.com/rss/search?q="+encodeURIComponent(q)+"&hl=en-US&gl=US&ceid=US:en"} function proxy(u){return "https://api.allorigins.win/raw?url="+encodeURIComponent(u)}
+function clean(s=""){const d=document.createElement("div");d.innerHTML=s;return(d.textContent||d.innerText||"").replace(/\s+/g," ").trim()}
+function classify(text){const t=text.toLowerCase();if(/homicide|murder|killed|deadly shooting|fatal shooting/.test(t))return"HOMICIDE";if(/shooting|shots fired|gunfire|gun/.test(t))return"SHOOTING";if(/robbery|carjack/.test(t))return"ROBBERY";if(/burglary|break-in|break in/.test(t))return"BURGLARY";if(/pursuit|chase/.test(t))return"PURSUIT";if(/crash|collision|hit-and-run|hit and run|fatal crash|i-5|highway|traffic/.test(t))return"TRAFFIC";if(/fire|arson|smoke|burn/.test(t))return"FIRE";if(/missing|wanted|silver alert|amber alert/.test(t))return"MISSING";if(/arrest|charged|sentenced|convicted|pleads|court/.test(t))return"COURT";return"OTHER"}
+function sourceFromItem(item){const s=item.querySelector("source");if(s&&s.textContent)return s.textContent.trim();try{return new URL(item.querySelector("link")?.textContent||"").hostname.replace("www.","")}catch{return"News"}}
+function isRelevant(title,desc){const text=(title+" "+desc).toLowerCase();return /(stockton|san joaquin|lodi|manteca|tracy|french camp)/.test(text)&&/(shooting|homicide|murder|killed|robbery|burglary|arrest|police|sheriff|deputy|officer|pursuit|crash|hit-and-run|fire|missing|wanted|stabbing|assault|gun|sentenced|charged|court)/.test(text)}
+function extractLocationText(text){const known=["Hammer Lane","March Lane","Pacific Avenue","Charter Way","Wilson Way","El Dorado Street","Airport Way","West Lane","Pershing Avenue","Waterloo Road","Benjamin Holt Drive","I-5","Highway 99","Downtown Stockton","Lincoln Village"];for(const k of known){if(text.toLowerCase().includes(k.toLowerCase()))return k}const ps=[/near ([A-Z][A-Za-z0-9 .'-]+(?:Road|Rd|Street|St|Avenue|Ave|Lane|Ln|Boulevard|Blvd|Drive|Dr|Way|Highway|I-\d+))/,/on ([A-Z][A-Za-z0-9 .'-]+(?:Road|Rd|Street|St|Avenue|Ave|Lane|Ln|Boulevard|Blvd|Drive|Dr|Way|Highway|I-\d+))/,/at ([A-Z][A-Za-z0-9 .'-]+(?:Road|Rd|Street|St|Avenue|Ave|Lane|Ln|Boulevard|Blvd|Drive|Dr|Way|Highway|I-\d+))/];for(const p of ps){const m=text.match(p);if(m)return m[1]}return"Stockton, CA"}
+async function geocode(story){if(!story.locationText||story.locationText==="Stockton, CA"){story.lat=STOCKTON.lat;story.lng=STOCKTON.lng;story.geocodeQuality="city";return story}const key="geo_"+story.locationText;const cached=localStorage.getItem(key);if(cached){const j=JSON.parse(cached);story.lat=j.lat;story.lng=j.lng;story.geocodeQuality=j.quality;return story}try{const res=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(story.locationText+", Stockton, CA"));const data=await res.json();if(data&&data[0]){story.lat=parseFloat(data[0].lat);story.lng=parseFloat(data[0].lon);story.geocodeQuality="street"}else{story.lat=STOCKTON.lat;story.lng=STOCKTON.lng;story.geocodeQuality="city"}}catch{story.lat=STOCKTON.lat;story.lng=STOCKTON.lng;story.geocodeQuality="city"}localStorage.setItem(key,JSON.stringify({lat:story.lat,lng:story.lng,quality:story.geocodeQuality}));return story}
+function dedupe(items){const seen=new Map();for(const s of items){const key=s.title.toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\b(stockton|california|police|sheriff)\b/g,"").replace(/\s+/g," ").trim().slice(0,80);if(!seen.has(key))seen.set(key,s);else{const old=seen.get(key);if(!old.sources.some(x=>x.url===s.url))old.sources.push(...s.sources);if(s.summary.length>old.summary.length)old.summary=s.summary}}return[...seen.values()]}
+async function fetchStories(){document.body.classList.add("loading");$("status").textContent="Pulling Google News RSS...";let found=[];for(const q of queries){try{const res=await fetch(proxy(googleNewsRss(q)));if(!res.ok)throw new Error("HTTP "+res.status);const xml=await res.text();const doc=new DOMParser().parseFromString(xml,"text/xml");for(const item of [...doc.querySelectorAll("item")]){const title=clean(item.querySelector("title")?.textContent||"");const desc=clean(item.querySelector("description")?.textContent||"");const url=item.querySelector("link")?.textContent||"";const date=new Date(item.querySelector("pubDate")?.textContent||Date.now());const source=sourceFromItem(item);if(!title||!isRelevant(title,desc))continue;const text=title+" "+desc;found.push({id:(title+"-"+url).toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,140),title,summary:desc||"Open the source for details.",category:classify(text),date:isNaN(date.getTime())?new Date().toISOString():date.toISOString(),locationText:extractLocationText(text),lat:STOCKTON.lat,lng:STOCKTON.lng,status:/arrest|charged|sentenced|convicted|court/i.test(text)?"Arrest/Court Update":"Reported",arrest:/arrest|charged|sentenced|convicted|court/i.test(text),source,url,sources:[{name:source,url}],timeline:[{label:"Published",detail:isNaN(date.getTime())?"Unknown":date.toLocaleString()},{label:"Discovered",detail:"Google News RSS"},{label:"Mapped",detail:"Location extracted from title or summary when possible"}]})}}catch(e){console.warn("Query failed",q,e)}}found=dedupe(found).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,60);$("status").textContent=`Found ${found.length} stories. Mapping locations...`;stories=[];for(const s of found){stories.push(await geocode(s));await new Promise(r=>setTimeout(r,100))}localStorage.setItem("newsStoriesCache",JSON.stringify({time:Date.now(),stories}));$("status").textContent=`Loaded ${stories.length} news stories. Updated ${new Date().toLocaleTimeString()}.`;document.body.classList.remove("loading");render();if(stories[0])selectStory(stories[0].id)}
+function loadCached(){try{const c=JSON.parse(localStorage.getItem("newsStoriesCache")||"null");if(c&&c.stories&&Date.now()-c.time<30*60*1000){stories=c.stories;$("status").textContent=`Loaded ${stories.length} cached stories. Hit Refresh for latest.`;render();if(stories[0])selectStory(stories[0].id);return true}}catch{}return false}
+function daysAgo(s){return Math.floor((new Date()-new Date(s.date))/86400000)}function matchesRange(s){const r=$("rangeFilter").value,a=daysAgo(s);if(r==="TODAY")return a===0;if(r==="WEEK")return a<=7;if(r==="MONTH")return a<=31;return true}
+function visibleStories(){const cat=$("categoryFilter").value;const search=($("searchBox").value+" "+$("quickSearch").value).trim().toLowerCase();return stories.filter(s=>{if(!matchesRange(s))return false;if(cat!=="ALL"&&s.category!==cat)return false;const hay=`${s.title} ${s.locationText} ${s.summary} ${s.source}`.toLowerCase();if(search&&!hay.includes(search))return false;return true}).sort((a,b)=>new Date(b.date)-new Date(a.date))}
+function markerIcon(s){return L.divIcon({className:"",html:`<div style="width:22px;height:22px;border-radius:50%;background:${categoryColors[s.category]||categoryColors.OTHER};border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,.55)"></div>`,iconSize:[22,22],iconAnchor:[11,11]})}
+function render(){markers.forEach(m=>map.removeLayer(m));markers=[];const list=visibleStories();list.forEach(story=>{const m=L.marker([story.lat,story.lng],{icon:markerIcon(story)}).addTo(map);m.bindPopup(`<div class="popup"><h3>${story.title}</h3><p>${story.summary}</p><b>${story.locationText}</b><br>${new Date(story.date).toLocaleString()}<br><button onclick="selectStory('${story.id}')">Open Story</button></div>`);markers.push(m)});renderFeed(list);updateStats(list)}
+function renderFeed(list){const feed=$("feed");feed.innerHTML="";list.forEach(story=>{const div=document.createElement("div");div.className="feedItem"+(story.id===selectedId?" active":"");div.innerHTML=`<div class="meta">${new Date(story.date).toLocaleDateString()} • ${story.locationText}</div><div class="title"><span class="category-dot" style="background:${categoryColors[story.category]||categoryColors.OTHER}"></span>${story.title}</div><div class="desc">${story.summary}</div><span class="badge">${story.category}</span><span class="badge">${story.status}</span><span class="badge">${story.source}</span>${story.geocodeQuality==="city"?'<span class="badge">Approx. Map</span>':''}`;div.onclick=()=>selectStory(story.id);feed.appendChild(div)})}
+function updateStats(list){$("totalStories").textContent=list.length;$("violentStories").textContent=list.filter(s=>["SHOOTING","HOMICIDE","ROBBERY"].includes(s.category)).length;$("arrestStories").textContent=list.filter(s=>s.arrest).length;$("sourceCount").textContent=new Set(list.flatMap(s=>(s.sources||[]).map(x=>x.name))).size;$("showingLabel").textContent="Showing: "+$("rangeFilter").selectedOptions[0].textContent;$("countLabel").textContent=list.length+" stories visible"}
+window.selectStory=function(id){selectedId=id;const story=stories.find(s=>s.id===id);if(!story)return;$("storyTitle").textContent=story.title;$("storyMeta").innerHTML=`${new Date(story.date).toLocaleString()}<br>${story.locationText}<br>${story.source}`;$("storyDetails").innerHTML=`<div class="card"><span class="badge">${story.category}</span><span class="badge">${story.status}</span>${story.arrest?'<span class="badge">Arrest/Court Mentioned</span>':''}${story.geocodeQuality==="city"?'<span class="badge">Mapped to City Center</span>':''}<p>${story.summary}</p></div><div class="card"><h3>Sources</h3>${(story.sources||[]).map(s=>`<a class="sourceLink" href="${s.url}" target="_blank" rel="noopener">${s.name}<small>${s.url}</small></a>`).join("")}</div><div class="card"><h3>Timeline</h3><div class="timeline">${(story.timeline||[]).map(t=>`<div><b>${t.label}</b><small>${t.detail}</small></div>`).join("")}</div></div>`;map.setView([story.lat,story.lng],story.geocodeQuality==="street"?15:12);renderFeed(visibleStories())}
+function fitMap(){const list=visibleStories();if(!list.length)return;map.fitBounds(L.latLngBounds(list.map(s=>[s.lat,s.lng])).pad(.2))}
+$("rangeFilter").onchange=render;$("categoryFilter").onchange=render;$("searchBox").oninput=render;$("quickSearch").oninput=render;$("fitBtn").onclick=fitMap;$("refreshBtn").onclick=()=>fetchStories();if(!loadCached())fetchStories();
+</script>
 </body>
 </html>
