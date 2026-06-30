@@ -1,0 +1,19 @@
+[
+  {
+    "id": "sample",
+    "type": "Shooting",
+    "title": "Sample incident until updater runs",
+    "date": "2026-06-30T12:00:00.000Z",
+    "location": "Stockton, CA",
+    "lat": 37.9577,
+    "lng": -121.2908,
+    "summary": "This placeholder will be replaced or supplemented when the GitHub Action updates incidents.json.",
+    "status": "Placeholder",
+    "articles": [
+      {
+        "title": "Placeholder",
+        "url": "https://news.google.com/search?q=Stockton%20crime"
+      }
+    ]
+  }
+]
